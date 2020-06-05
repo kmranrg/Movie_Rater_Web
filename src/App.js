@@ -6,7 +6,7 @@ import MovieForm from './components/movie-form'
 
 function App() {
 
-  const [movies, setMovie] = useState([]);
+  const [movies, setMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [editedMovie, setEditedMovie] = useState(null);
 
@@ -19,7 +19,7 @@ function App() {
       }
     })
     .then( resp => resp.json() )
-    .then( resp => setMovie(resp))
+    .then( resp => setMovies(resp))
     .catch(error => console.log(error))
   }, [])
 
@@ -28,10 +28,34 @@ function App() {
     setEditedMovie(null);
   }
   
-
   const editClicked = movie => {
     setEditedMovie(movie);
     setSelectedMovie(null);
+  }
+
+  const updatedMovie = movie => {
+    const newMovies = movies.map( mov => {
+      if (mov.id === movie.id) {
+        return movie;
+      }
+      return mov;
+    })
+    setMovies(newMovies)
+  }
+
+  const newMovie = () => {
+    setEditedMovie( {title: '', description: ''} );
+    setSelectedMovie(null);
+  }
+
+  const movieCreated = movie => {
+    const newMovies = [...movies, movie];
+    setMovies(newMovies);
+  }
+
+  const removeClicked = movie => {
+    const newMovies = movies.filter( mov => mov.id !== movie.id);
+    setMovies(newMovies);
   }
 
   return (
@@ -40,9 +64,19 @@ function App() {
         <h1>Movie Rater</h1>
       </header>
       <div className="layout">
-        <MovieList movies={movies} movieClicked={loadMovie} editClicked={editClicked} />
+        <div>
+          <MovieList 
+            movies={movies} 
+            movieClicked={loadMovie} 
+            editClicked={editClicked} 
+            removeClicked={removeClicked}
+          />
+          <button onClick={ newMovie } >New Movie</button>
+        </div>
         <MovieDetails movie={selectedMovie} updateMovie={loadMovie} />
-        { editedMovie ? <MovieForm movie={editedMovie} /> : null }
+        { editedMovie ? 
+        <MovieForm movie={editedMovie} updatedMovie={updatedMovie} movieCreated={movieCreated} /> 
+        : null }
       </div>
     </div>
   );
